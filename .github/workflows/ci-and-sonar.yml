@@ -1,4 +1,4 @@
-name: My Build
+name: CI & Sonar
 on:
   push:
     branches:
@@ -33,4 +33,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Diana0422_syncope2 -Drat.numUnapprovedLicenses=2
+        run: mvn -B -Pcoverage-profile verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Diana0422_syncope2 -Drat.numUnapprovedLicenses=2
