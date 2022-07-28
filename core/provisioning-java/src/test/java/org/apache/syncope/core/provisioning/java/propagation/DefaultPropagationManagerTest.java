@@ -3,6 +3,8 @@ package org.apache.syncope.core.provisioning.java.propagation;
 import org.apache.syncope.common.lib.types.AnyTypeKind;
 import org.apache.syncope.core.persistence.api.dao.*;
 import org.apache.syncope.core.persistence.api.entity.*;
+import org.apache.syncope.core.persistence.api.entity.anyobject.AnyObject;
+import org.apache.syncope.core.persistence.api.entity.group.Group;
 import org.apache.syncope.core.persistence.api.entity.user.User;
 import org.apache.syncope.core.provisioning.api.DerAttrHandler;
 import org.apache.syncope.core.provisioning.api.MappingManager;
@@ -10,10 +12,8 @@ import org.apache.syncope.core.provisioning.java.propagation.dummies.*;
 import org.apache.syncope.core.provisioning.java.propagation.utils.*;
 import org.apache.syncope.core.spring.ApplicationContextProvider;
 import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.junit.BeforeClass;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 import java.util.*;
 
@@ -27,14 +27,16 @@ abstract class DefaultPropagationManagerTest {
     protected MappingManager mappingManager; //yes
     protected DerAttrHandler derAttrHandler; //yes
 
+    protected MockedStatic<ApplicationContextProvider> context;
+
     protected DummyProvision provision;
     private DummyVirSchema virSchema;
     private DummyExternalResource externalResource;
     private DummyMapping mapping;
-    private UserAnyType anyType;
+    private AnyType anyType;
 
     public DefaultPropagationManagerTest(AnyTypeKind anyTypeKind) {
-        initDummyImpl();
+        initDummyImpl(anyTypeKind);
         this.externalResourceDAO = getMockedExternalResourceDAO();
         this.virSchemaDAO = getMockedVirSchemaDAO();
         this.mappingManager = getMockedMappingManager();
@@ -43,23 +45,24 @@ abstract class DefaultPropagationManagerTest {
         settingDummyImpl(anyTypeKind);
     }
 
-    @BeforeClass
-    public static void setUp(){
-        DummyAnyTypeDAO dummyAnyTypeDAO = new DummyAnyTypeDAO();
-        DefaultListableBeanFactory factory=new DefaultListableBeanFactory();
-        factory.registerSingleton("dummyAnyTypeDAO", dummyAnyTypeDAO);
-        factory.autowireBean(dummyAnyTypeDAO);
-        factory.initializeBean(dummyAnyTypeDAO, "Master");
-        MockedStatic<ApplicationContextProvider> util = Mockito.mockStatic(ApplicationContextProvider.class);
-        util.when(ApplicationContextProvider::getBeanFactory).thenReturn(factory);
-    }
-
-    private void initDummyImpl() {
+    private void initDummyImpl(AnyTypeKind anyTypeKind) {
         /* init dummies */
         this.virSchema = new DummyVirSchema();
         this.provision = new DummyProvision();
         this.mapping = new DummyMapping();
-        this.anyType = new UserAnyType();
+        // TODO forse riunire in un unica classe AnyType e passare il tipo al costruttore
+        if (anyTypeKind != null) {
+            switch (anyTypeKind) {
+                case USER:
+                    this.anyType = new UserAnyType();
+                    break;
+                case GROUP:
+                    this.anyType = new GroupAnyType();
+                    break;
+                case ANY_OBJECT:
+                    this.anyType = new AnyObjectAnyType();
+            }
+        }
     }
 
     private void settingDummyImpl(AnyTypeKind anyTypeKind) {
@@ -75,18 +78,24 @@ abstract class DefaultPropagationManagerTest {
 
     private AnyUtilsFactory getMockedAnyUtilsFactory() {
         AnyUtilsFactory anyUtilsFactory = Mockito.mock(AnyUtilsFactory.class);
-        // TODO anyObjectTested
-        // TODO groupTested
 
         /* User */
-        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.USER)).thenReturn(new DummyAnyUtils(AnyTypeKind.USER, anyUtilsFactory));
-        Mockito.when(anyUtilsFactory.getInstance(any(User.class))).thenReturn(new DummyAnyUtils(AnyTypeKind.USER, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.USER))
+                .thenReturn(new DummyAnyUtils(AnyTypeKind.USER, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(any(User.class)))
+                .thenReturn(new DummyAnyUtils(AnyTypeKind.USER, anyUtilsFactory));
 
         /* AnyObject */
-        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.ANY_OBJECT)).thenReturn(new DummyAnyUtils(AnyTypeKind.ANY_OBJECT, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.ANY_OBJECT))
+                .thenReturn(new DummyAnyUtils(AnyTypeKind.ANY_OBJECT, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(any(AnyObject.class)))
+                .thenReturn(new DummyAnyUtils(AnyTypeKind.ANY_OBJECT, anyUtilsFactory));
 
         /* Group */
-        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.GROUP)).thenReturn(new DummyAnyUtils(AnyTypeKind.GROUP, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.GROUP))
+                .thenReturn(new DummyAnyUtils(AnyTypeKind.GROUP, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(any(Group.class)))
+                .thenReturn(new DummyAnyUtils(AnyTypeKind.GROUP, anyUtilsFactory));
         return anyUtilsFactory;
     }
 
@@ -109,7 +118,8 @@ abstract class DefaultPropagationManagerTest {
         VirSchemaDAO virSchema = Mockito.mock(VirSchemaDAO.class);
         Mockito.when(virSchema.find("vSchema")).thenReturn(this.virSchema);
         virSchema.find("vSchema").setProvision(provision);
-        Mockito.when(virSchema.findByProvision(provision)).thenReturn(new ArrayList<>(Collections.singleton(this.virSchema)));
+        Mockito.when(virSchema.findByProvision(provision))
+                .thenReturn(new ArrayList<>(Collections.singleton(this.virSchema)));
         return virSchema;
     }
 }

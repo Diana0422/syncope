@@ -1,16 +1,26 @@
 package org.apache.syncope.core.provisioning.java.propagation.dummies;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.syncope.common.lib.request.AnyCR;
 import org.apache.syncope.common.lib.request.AnyUR;
 import org.apache.syncope.common.lib.to.AnyTO;
 import org.apache.syncope.common.lib.types.AnyTypeKind;
 import org.apache.syncope.core.persistence.api.dao.*;
 import org.apache.syncope.core.persistence.api.entity.*;
+import org.apache.syncope.core.persistence.api.entity.anyobject.AnyObject;
+import org.apache.syncope.core.persistence.api.entity.group.Group;
 import org.apache.syncope.core.persistence.api.entity.resource.ExternalResource;
 import org.apache.syncope.core.persistence.api.entity.user.User;
+import org.apache.syncope.core.persistence.jpa.dao.AbstractAnyDAO;
+import org.apache.syncope.core.persistence.jpa.dao.JPAUserDAO;
+import org.apache.syncope.core.provisioning.java.propagation.utils.AnyObjectAnyType;
+import org.apache.syncope.core.provisioning.java.propagation.utils.AnyObjectTested;
+import org.apache.syncope.core.provisioning.java.propagation.utils.GroupTested;
 import org.apache.syncope.core.provisioning.java.propagation.utils.UserTested;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -101,7 +111,7 @@ public class DummyAnyUtils implements AnyUtils {
 
         switch (anyTypeKind()) {
             case USER:
-                result = (AnyDAO<A>) Mockito.mock(UserDAO.class);
+                result = (AnyDAO<A>) Mockito.mock(JPAUserDAO.class);
                 User user = new UserTested();
                 Mockito.when(result.authFind("validKey")).thenReturn((A) user);
                 Mockito.when(result.findAllowedSchemas((A) any(User.class), eq(VirSchema.class))).thenReturn(new AllowedSchemas<>());
@@ -109,14 +119,35 @@ public class DummyAnyUtils implements AnyUtils {
 
             case GROUP:
                 result = (AnyDAO<A>) Mockito.mock(GroupDAO.class);
+                Group group = new GroupTested();
+                Mockito.when(result.authFind("validKey")).thenReturn((A) group);
+                Mockito.when(result.findAllowedSchemas((A) any(Group.class), eq(VirSchema.class))).thenReturn(new AllowedSchemas<>());
                 break;
 
             case ANY_OBJECT:
                 result = (AnyDAO<A>) Mockito.mock(AnyObjectDAO.class);
+                AnyObject obj = new AnyObjectTested();
+                AnyType type = new AnyObjectAnyType();
+                if (anyTypeKind != null) type.setKey(anyTypeKind.name());
+                obj.setType(type);
+                Mockito.when(result.authFind("validKey")).thenReturn((A) obj);
+                Mockito.when(result.findAllowedSchemas((A) any(AnyObject.class), eq(VirSchema.class))).thenReturn(new AllowedSchemas<>());
                 break;
             default:
                 break;
         }
+        Mockito.when(result.authFind(null)).thenAnswer(invocationOnMock -> {
+            throw new NotFoundException("Null key");
+        });
+        Mockito.when(result.authFind("invalidKey")).thenAnswer(invocationOnMock -> {
+            throw new NotFoundException(StringUtils.substringBefore(
+                    StringUtils.substringAfter(getClass().getSimpleName(), "JPA"), "DAO") + ' ' + "invalidKey");
+        });
+        Mockito.when(result.authFind("")).thenAnswer(invocationOnMock -> {
+            throw new NotFoundException(StringUtils.substringBefore(
+                    StringUtils.substringAfter(getClass().getSimpleName(), "JPA"), "DAO") + ' ' + "");
+        });
+
         return result;
     }
 

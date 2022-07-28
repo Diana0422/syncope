@@ -5,6 +5,8 @@ import org.apache.syncope.core.persistence.api.dao.AnyTypeDAO;
 import org.apache.syncope.core.persistence.api.entity.AnyType;
 import org.apache.syncope.core.persistence.api.entity.AnyTypeClass;
 import org.apache.syncope.core.persistence.jpa.dao.AbstractDAO;
+import org.apache.syncope.core.provisioning.java.propagation.utils.AnyObjectAnyType;
+import org.apache.syncope.core.provisioning.java.propagation.utils.GroupAnyType;
 import org.apache.syncope.core.provisioning.java.propagation.utils.UserAnyType;
 
 import java.util.List;
@@ -18,6 +20,10 @@ public class DummyAnyTypeDAO extends AbstractDAO<AnyType> implements AnyTypeDAO 
                 result = new UserAnyType();
                 break;
             case "GROUP":
+                result = new GroupAnyType();
+                break;
+            case "ANY_OBJECT":
+                result = new AnyObjectAnyType();
                 break;
         }
         if (result != null) {
@@ -33,9 +39,7 @@ public class DummyAnyTypeDAO extends AbstractDAO<AnyType> implements AnyTypeDAO 
     }
 
     @Override
-    public AnyType findGroup() {
-        return null;
-    }
+    public AnyType findGroup() { return find(AnyTypeKind.GROUP.name()); }
 
     @Override
     public List<AnyType> findByTypeClass(AnyTypeClass anyTypeClass) {
