@@ -264,23 +264,6 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
                 .setAuthentication(new AnonymousAuthenticationToken("test", "test", authorities));
     }
 
-    @Before
-    public void setUp() {
-        DummyAnyTypeDAO dummyAnyTypeDAO = new DummyAnyTypeDAO();
-        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-        factory.registerSingleton("dummyAnyTypeDAO", dummyAnyTypeDAO);
-        factory.autowireBean(dummyAnyTypeDAO);
-        factory.initializeBean(dummyAnyTypeDAO, "Master");
-
-        context = Mockito.mockStatic(ApplicationContextProvider.class);
-        context.when(ApplicationContextProvider::getBeanFactory).thenReturn(factory);
-    }
-
-    @After
-    public void tearDown() {
-        context.close();
-    }
-
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
