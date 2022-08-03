@@ -81,6 +81,7 @@ public abstract class PropagationManagerAndExecutorIT {
 
         context = Mockito.mockStatic(ApplicationContextProvider.class);
         context.when(ApplicationContextProvider::getBeanFactory).thenReturn(factory);
+
     }
 
     @After

@@ -1,6 +1,10 @@
 package org.apache.syncope.core.provisioning.java.propagation;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.syncope.common.lib.Attr;
 import org.apache.syncope.common.lib.types.AnyTypeKind;
+import org.apache.syncope.common.lib.types.ResourceOperation;
 import org.apache.syncope.core.persistence.api.dao.*;
 import org.apache.syncope.core.persistence.api.entity.*;
 import org.apache.syncope.core.persistence.api.entity.anyobject.AnyObject;
@@ -8,19 +12,31 @@ import org.apache.syncope.core.persistence.api.entity.group.Group;
 import org.apache.syncope.core.persistence.api.entity.user.User;
 import org.apache.syncope.core.provisioning.api.DerAttrHandler;
 import org.apache.syncope.core.provisioning.api.MappingManager;
+import org.apache.syncope.core.provisioning.api.PropagationByResource;
+import org.apache.syncope.core.provisioning.api.propagation.PropagationManager;
+import org.apache.syncope.core.provisioning.api.propagation.PropagationTaskInfo;
 import org.apache.syncope.core.provisioning.java.propagation.dummies.*;
 import org.apache.syncope.core.provisioning.java.propagation.utils.*;
 import org.apache.syncope.core.spring.ApplicationContextProvider;
+import org.apache.syncope.core.spring.security.SyncopeGrantedAuthority;
+import org.identityconnectors.framework.common.objects.Attribute;
+import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
+import org.identityconnectors.framework.common.objects.Uid;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.*;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 
 abstract class DefaultPropagationManagerTest {
 
@@ -37,6 +53,22 @@ abstract class DefaultPropagationManagerTest {
     private DummyExternalResource externalResource;
     private DummyMapping mapping;
     private AnyType anyType;
+
+    protected PropagationManager propagationManager;
+
+    protected AnyTypeKind anyTypeKind;
+    protected String key;
+    protected Boolean enable;
+    protected PropagationByResource<String> propByRes;
+    protected Collection<Attr> vAttr;
+    protected Collection<String> noPropResourceKeys;
+
+    // getusercreate
+    protected String password;
+    protected PropagationByResource<Pair<String, String>> propByLinkedAccount;
+
+    protected List<PropagationTaskInfo> expected;
+    protected Exception expectedError;
 
     public DefaultPropagationManagerTest(AnyTypeKind anyTypeKind) {
         initDummyImpl(anyTypeKind);
@@ -126,6 +158,17 @@ abstract class DefaultPropagationManagerTest {
         return virSchema;
     }
 
+    @BeforeClass
+    public static void init() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        SecurityContextHolder.getContextHolderStrategy().setContext(context);
+        SyncopeGrantedAuthority auth = new SyncopeGrantedAuthority("test");
+        ArrayList<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(auth);
+        SecurityContextHolder.getContextHolderStrategy().getContext()
+                .setAuthentication(new AnonymousAuthenticationToken("test", "test", authorities));
+    }
+
     @Before
     public void setUp() {
         DummyAnyTypeDAO dummyAnyTypeDAO = new DummyAnyTypeDAO();
@@ -141,5 +184,171 @@ abstract class DefaultPropagationManagerTest {
     @After
     public void tearDown() {
         context.close();
+    }
+
+    protected void configureExpected(ReturnType returnType) {
+        switch (returnType) {
+            case OK:
+                this.expected = new ArrayList<>(Collections.singleton(new PropagationTaskInfo(externalResourceDAO.find("testResource"))));
+                break;
+            case NULL_PTR_ERROR:
+                this.expectedError = new NullPointerException();
+                break;
+            case NOT_FOUND_ERROR:
+                this.expectedError = new NotFoundException("msg");
+                break;
+            case FAIL:
+                this.expected = new ArrayList<>();
+                break;
+            default:
+                System.out.println("CASE DEFAULT");
+                break;
+        }
+    }
+
+    protected void configureNoPropResourceKeys(ParamType noPropResourceKeysType) {
+        switch (noPropResourceKeysType) {
+            case NULL:
+                System.out.println("CASE NULL");
+                this.noPropResourceKeys = null;
+                break;
+            case EMPTY:
+                System.out.println("CASE EMPTY");
+                this.noPropResourceKeys = new ArrayList<>();
+                break;
+            case VALID:
+                System.out.println("CASE VALID");
+                this.noPropResourceKeys = new ArrayList<>();
+                this.noPropResourceKeys.add("invalidKey");
+                break;
+            case INVALID:
+                System.out.println("CASE INVALID");
+                this.noPropResourceKeys = new ArrayList<>();
+                this.noPropResourceKeys.add("validKey");
+                break;
+            default:
+                System.out.println("CASE DEFAULT");
+                break;
+        }
+    }
+
+    protected void configureVAttr(ParamType vAttrType) {
+        Attr attr = new Attr();
+        switch (vAttrType) {
+            case NULL:
+                System.out.println("CASE NULL");
+                this.vAttr = null;
+                break;
+            case EMPTY:
+                System.out.println("CASE EMPTY");
+                this.vAttr = new ArrayList<>();
+                break;
+            case VALID:
+                System.out.println("CASE VALID");
+                attr.setSchema("vSchema");
+                this.vAttr = new ArrayList<>();
+                this.vAttr.add(attr);
+                break;
+            case INVALID:
+                System.out.println("CASE INVALID");
+                attr.setSchema("invalidSchema");
+                this.vAttr = new ArrayList<>();
+                this.vAttr.add(attr);
+                break;
+            default:
+                System.out.println("CASE DEFAULT");
+                break;
+        }
+    }
+
+    protected void configurePropByRes(ParamType propByResType) {
+        switch (propByResType) {
+            case NULL:
+                System.out.println("CASE NULL");
+                this.propByRes = null;
+                break;
+            case EMPTY:
+                System.out.println("CASE EMPTY");
+                this.propByRes = new PropagationByResource<>();
+                break;
+            case INVALID:
+                System.out.println("CASE INVALID");
+                this.propByRes = new PropagationByResource<>();
+                this.propByRes.add(ResourceOperation.DELETE, "invalidKey");
+                break;
+            case VALID:
+                System.out.println("CASE VALID");
+                this.propByRes = new PropagationByResource<>();
+                this.propByRes.add(ResourceOperation.CREATE, "validKey");
+                break;
+            default:
+                System.out.println("CASE DEFAULT");
+                break;
+        }
+    }
+
+
+    protected void configureKey(ParamType keyType) {
+        switch (keyType) {
+            case NULL:
+                System.out.println("CASE NULL");
+                this.key = null;
+                break;
+            case EMPTY:
+                System.out.println("CASE EMPTY");
+                this.key = "";
+                break;
+            case VALID:
+                System.out.println("CASE VALID");
+                this.key = "validKey";
+                break;
+            case INVALID:
+                System.out.println("CASE INVALID");
+                this.key = "invalidKey";
+                break;
+            default:
+                System.out.println("CASE DEFAULT");
+                break;
+        }
+    }
+
+    protected void configureAnyType(AnyTypeKind anyTypeKind, String testName) {
+        if (anyTypeKind != null) {
+            Set<Attribute> attributes = new HashSet<>();
+            Attribute name;
+            Attribute uid;
+            ImmutablePair<String, Set<Attribute>> attrs = new ImmutablePair<>("info", attributes);
+            switch (anyTypeKind) {
+                case USER:
+                    name = new Name("Diana Pasquali");
+                    uid = new Uid("diapascal");
+                    attributes.add(name);
+                    attributes.add(uid);
+
+                    /* User */
+                    Mockito.when(mappingManager.prepareAttrsFromAny(any(User.class), argThat(s -> s == null || s.equals("myPass")), eq(true), eq(enable), any(provision.getClass()))).thenReturn(attrs);
+                    break;
+                case GROUP:
+                    name = new Name("Group Name");
+                    uid = new Uid("groupuid");
+                    attributes.add(name);
+                    attributes.add(uid);
+
+                    /* Group */
+                    Mockito.when(mappingManager.prepareAttrsFromAny(any(Group.class), eq(null), eq(true), eq(enable), any(provision.getClass()))).thenReturn(attrs);
+                    break;
+                case ANY_OBJECT:
+                    name = new Name("Any Name");
+                    uid = new Uid("anyobjuid");
+                    attributes.add(name);
+                    attributes.add(uid);
+
+                    /* Group */
+                    Mockito.when(mappingManager.prepareAttrsFromAny(any(AnyObject.class), eq(null), eq(true), eq(enable), any(provision.getClass()))).thenReturn(attrs);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + anyTypeKind);
+            }
+        }
     }
 }

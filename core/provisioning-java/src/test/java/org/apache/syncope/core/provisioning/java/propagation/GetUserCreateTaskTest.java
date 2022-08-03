@@ -8,11 +8,9 @@ import org.apache.syncope.core.provisioning.api.PropagationByResource;
 import org.apache.syncope.core.provisioning.api.propagation.PropagationTaskInfo;
 import org.apache.syncope.core.provisioning.java.propagation.utils.ParamType;
 import org.apache.syncope.core.provisioning.java.propagation.utils.ReturnType;
-import org.apache.syncope.core.spring.ApplicationContextProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.MockedStatic;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,21 +20,39 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
-public class GetUserCreateTaskTest extends GetCreateTasksTest{
+public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
 
     private String password;
     private PropagationByResource<Pair<String, String>> propByLinkedAccount;
 
-    private MockedStatic<ApplicationContextProvider> context;
-
     public GetUserCreateTaskTest(ParamType keyType, ParamType passType, Boolean enable, ParamType propByResType, ParamType propByLinkedAccountType, ParamType vAttrType, ParamType noPropResourceKeysType, ReturnType returnType) {
-        super(AnyTypeKind.USER, keyType, enable, propByResType, vAttrType, noPropResourceKeysType, returnType);
-        configure(passType, propByLinkedAccountType);
+        super(AnyTypeKind.USER);
+        configure(keyType, passType, enable, propByResType, propByLinkedAccountType, vAttrType, noPropResourceKeysType, returnType);
     }
 
-    private void configure(ParamType passType, ParamType propByLinkedAccountType) {
+    private void configure(ParamType keyType, ParamType passType, Boolean enable, ParamType propByResType, ParamType propByLinkedAccountType, ParamType vAttrType, ParamType noPropResourceKeysType, ReturnType returnType) {
+        this.propagationManager = new DefaultPropagationManager(
+                virSchemaDAO,
+                externalResourceDAO,
+                null,
+                null,
+                mappingManager,
+                derAttrHandler,
+                anyUtilsFactory
+        );
+
+        this.enable = enable;
+        this.anyTypeKind = AnyTypeKind.USER;
+
+        configureAnyType(AnyTypeKind.USER, this.getClass().getName());
+        configureKey(keyType);
         configurePass(passType);
+        configurePropByRes(propByResType);
         configureLinkedAccount(propByLinkedAccountType);
+        configureVAttr(vAttrType);
+        configureNoPropResourceKeys(noPropResourceKeysType);
+        configureExpected(returnType);
+        System.out.println("anyTypeKind = " + anyTypeKind + ", key = " + key + ", enable = " + enable + ", propByRes = " + propByRes+ ", vAttr = " + vAttr + ", noPropResourceKeys = " + noPropResourceKeys + ", returnType = " + returnType);
     }
 
     private void configurePass(ParamType passType) {
@@ -103,12 +119,12 @@ public class GetUserCreateTaskTest extends GetCreateTasksTest{
                 {ParamType.INVALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
                 {ParamType.NULL, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
                 {ParamType.EMPTY, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {ParamType.VALID, ParamType.EMPTY, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NULL_PTR_ERROR}, //fixme + levare dipendenza tra i due test
+                {ParamType.VALID, ParamType.EMPTY, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NULL_PTR_ERROR},
                 {ParamType.VALID, ParamType.NULL, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-//                {ParamType.VALID, ParamType.INVALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NULL_PTR_ERROR}, //fixme + levare dipendenza tra i due test
+                {ParamType.VALID, ParamType.INVALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NULL_PTR_ERROR}, //fixme + levare dipendenza tra i due test
                 {ParamType.VALID, ParamType.VALID, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
                 {ParamType.VALID, ParamType.VALID, true, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.FAIL},
-//                {ParamType.VALID, ParamType.VALID, true, ParamType.NULL, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NULL_PTR_ERROR}, //fixme + levare dipendenza tra i due test
+                {ParamType.VALID, ParamType.VALID, true, ParamType.NULL, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NULL_PTR_ERROR}, //fixme + levare dipendenza tra i due test
                 {ParamType.VALID, ParamType.VALID, true, ParamType.INVALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.FAIL},
                 {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, ReturnType.OK},
                 {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.NULL, ParamType.VALID, ParamType.VALID, ReturnType.OK},

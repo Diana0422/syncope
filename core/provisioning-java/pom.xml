@@ -232,4 +232,122 @@ under the License.
       </testResource>
     </testResources>
   </build>
+
+  <profiles>
+<!--    &lt;!&ndash; ISW2-BA-DUA PROFILE &ndash;&gt;-->
+<!--    <profile>-->
+<!--      <id>badua-profile</id>-->
+<!--      <activation>-->
+<!--        <activeByDefault>false</activeByDefault>-->
+<!--      </activation>-->
+<!--      <properties>-->
+<!--        <ba-dua.version>0.6.0</ba-dua.version>-->
+<!--        <argLine>-javaagent:target/dependency/ba-dua-agent-rt-${ba-dua.version}-all.jar -Doutput.file=target/badua.ser</argLine>-->
+<!--      </properties>-->
+<!--      <dependencies>-->
+<!--        <dependency>-->
+<!--          <groupId>br.usp.each.saeg</groupId>-->
+<!--          <artifactId>ba-dua-cli</artifactId>-->
+<!--          <version>0.6.0</version>-->
+<!--        </dependency>-->
+<!--      </dependencies>-->
+<!--      <build>-->
+<!--        <plugins>-->
+
+<!--          &lt;!&ndash; Copy ba-dua-agent-rt from .m2 directory to target/dependency &ndash;&gt;-->
+<!--          <plugin>-->
+<!--            <groupId>org.apache.maven.plugins</groupId>-->
+<!--            <artifactId>maven-dependency-plugin</artifactId>-->
+<!--            <version>2.10</version>-->
+<!--            <executions>-->
+<!--              <execution>-->
+<!--                <goals>-->
+<!--                  <goal>copy</goal>-->
+<!--                </goals>-->
+<!--                <configuration>-->
+<!--                  <artifactItems>-->
+<!--                    <artifactItem>-->
+<!--                      <groupId>br.usp.each.saeg</groupId>-->
+<!--                      <artifactId>ba-dua-agent-rt</artifactId>-->
+<!--                      <classifier>all</classifier>-->
+<!--                      <version>${ba-dua.version}</version>-->
+<!--                      <outputDirectory>${project.basedir}/target/dependency</outputDirectory>-->
+<!--                    </artifactItem>-->
+<!--                  </artifactItems>-->
+<!--                </configuration>-->
+<!--              </execution>-->
+<!--            </executions>-->
+<!--          </plugin>-->
+
+<!--          &lt;!&ndash; Generate report in xml format &ndash;&gt;-->
+<!--          <plugin>-->
+<!--            <groupId>org.codehaus.mojo</groupId>-->
+<!--            <artifactId>exec-maven-plugin</artifactId>-->
+<!--            <version>1.5.0</version>-->
+<!--            <executions>-->
+<!--              <execution>-->
+<!--                <goals>-->
+<!--                  <goal>java</goal>-->
+<!--                </goals>-->
+<!--                <phase>verify</phase>-->
+<!--                <configuration>-->
+<!--                  <mainClass>br.usp.each.saeg.badua.cli.Report</mainClass>-->
+<!--                  <arguments>-->
+<!--                    <argument>-input</argument>-->
+<!--                    <argument>${project.build.directory}/badua.ser</argument>-->
+<!--                    <argument>-classes</argument>-->
+<!--                    <argument>${project.build.outputDirectory}</argument>-->
+<!--                    <argument>-show-classes</argument>-->
+<!--                    <argument>-show-methods</argument>-->
+<!--                    <argument>-xml</argument>-->
+<!--                    <argument>${project.build.directory}/badua.xml</argument>-->
+<!--                  </arguments>-->
+<!--                </configuration>-->
+<!--              </execution>-->
+<!--            </executions>-->
+<!--          </plugin>-->
+<!--        </plugins>-->
+<!--      </build>-->
+<!--    </profile>-->
+
+    <!-- ISW2-PITest profile -->
+    <profile>
+      <id>mutation-coverage-profile</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.8.0</version>
+            <configuration>
+              <verbose>true</verbose>
+              <targetClasses>
+                <!-- classes to test  -->
+                <param>org.apache.syncope.core.provisioning.java.propagation.DefaultPropagationManager</param><!-- class 1 to test -->
+                <param>org.apache.syncope.core.provisioning.java.propagation.PriorityPropagationTaskExecutor</param><!-- class 2 to test -->
+              </targetClasses>
+              <targetTests>
+                <!-- test implementations -->
+                <param>org.apache.syncope.core.provisioning.java.propagation.GetCreateTasksTest</param>
+                <param>org.apache.syncope.core.provisioning.java.propagation.GetUserCreateTasksTest</param>
+                <param>org.apache.syncope.core.provisioning.java.propagation.ExecuteTaskTest</param>
+              </targetTests>
+            </configuration>
+            <executions>
+              <execution>
+                <id>Mutation Report</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>mutationCoverage</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
