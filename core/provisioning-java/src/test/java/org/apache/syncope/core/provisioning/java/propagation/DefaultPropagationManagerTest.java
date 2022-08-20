@@ -10,14 +10,14 @@ import org.apache.syncope.core.persistence.api.entity.*;
 import org.apache.syncope.core.persistence.api.entity.anyobject.AnyObject;
 import org.apache.syncope.core.persistence.api.entity.group.Group;
 import org.apache.syncope.core.persistence.api.entity.user.User;
-import org.apache.syncope.core.provisioning.api.DerAttrHandler;
-import org.apache.syncope.core.provisioning.api.MappingManager;
-import org.apache.syncope.core.provisioning.api.PropagationByResource;
+import org.apache.syncope.core.provisioning.api.*;
+import org.apache.syncope.core.provisioning.api.cache.VirAttrCache;
 import org.apache.syncope.core.provisioning.api.propagation.PropagationManager;
 import org.apache.syncope.core.provisioning.api.propagation.PropagationTaskInfo;
 import org.apache.syncope.core.provisioning.java.propagation.dummies.*;
 import org.apache.syncope.core.provisioning.java.propagation.utils.*;
 import org.apache.syncope.core.spring.ApplicationContextProvider;
+import org.apache.syncope.core.spring.security.PasswordGenerator;
 import org.apache.syncope.core.spring.security.SyncopeGrantedAuthority;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.Name;
@@ -26,8 +26,7 @@ import org.identityconnectors.framework.common.objects.Uid;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,11 +39,11 @@ import static org.mockito.ArgumentMatchers.*;
 
 abstract class DefaultPropagationManagerTest {
 
-    protected VirSchemaDAO virSchemaDAO; //yes
-    protected AnyUtilsFactory anyUtilsFactory; //yes
-    protected ExternalResourceDAO externalResourceDAO; //yes
-    protected MappingManager mappingManager; //yes
-    protected DerAttrHandler derAttrHandler; //yes
+    protected VirSchemaDAO virSchemaDAO;
+    protected AnyUtilsFactory anyUtilsFactory;
+    protected ExternalResourceDAO externalResourceDAO;
+    protected MappingManager mappingManager;
+    protected DerAttrHandler derAttrHandler;
 
     protected MockedStatic<ApplicationContextProvider> context;
 
@@ -54,6 +53,7 @@ abstract class DefaultPropagationManagerTest {
     private DummyMapping mapping;
     private AnyType anyType;
 
+    /* SUT and test parameters */
     protected PropagationManager propagationManager;
 
     protected AnyTypeKind anyTypeKind;
@@ -63,15 +63,12 @@ abstract class DefaultPropagationManagerTest {
     protected Collection<Attr> vAttr;
     protected Collection<String> noPropResourceKeys;
 
-    // getusercreate
-    protected String password;
-    protected PropagationByResource<Pair<String, String>> propByLinkedAccount;
-
     protected List<PropagationTaskInfo> expected;
     protected Exception expectedError;
 
     public DefaultPropagationManagerTest(AnyTypeKind anyTypeKind) {
         initDummyImpl(anyTypeKind);
+        MockitoAnnotations.initMocks(this);
         this.externalResourceDAO = getMockedExternalResourceDAO();
         this.virSchemaDAO = getMockedVirSchemaDAO();
         this.mappingManager = getMockedMappingManager();
