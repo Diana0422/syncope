@@ -50,9 +50,7 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
                 // {anyTypeKind, key, enable, propByRes, vAttr, noPropResourceKeys, resultType}
-
-                /* ITER 1 */
-                // monodimensionale
+                /* Iteration 1 */
                 {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
                 {AnyTypeKind.GROUP, ParamType.VALID, null, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
                 {AnyTypeKind.ANY_OBJECT, ParamType.VALID, null, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
@@ -62,57 +60,11 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
                 {AnyTypeKind.USER, ParamType.VALID, false, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
                 {AnyTypeKind.USER, ParamType.VALID, null, ParamType.INVALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
                 {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ReturnType.OK},
-                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, ParamType.EMPTY, ParamType.INVALID, ReturnType.FAIL},
-//                {null, ParamType.NULL, true, ParamType.NULL, ParamType.NULL, ParamType.NULL, ReturnType.NULL_PTR_ERROR},
-//                {AnyTypeKind.USER, ParamType.NULL, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.USER, ParamType.EMPTY, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.USER, ParamType.INVALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.USER, ParamType.VALID, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, ReturnType.FAIL},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.INVALID, ParamType.VALID, ParamType.VALID, ReturnType.FAIL},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.NULL, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.INVALID, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.NULL, ReturnType.OK},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.INVALID, ReturnType.FAIL},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ReturnType.OK},
+                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, ReturnType.FAIL},
 
-                /* ITER 2 */
-                // multidimensionale tra propByRes e noPropResourceKeys
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.INVALID, ParamType.VALID, ParamType.NULL, ReturnType.FAIL},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.INVALID, ParamType.VALID, ParamType.EMPTY, ReturnType.FAIL},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.NULL, ParamType.VALID, ParamType.VALID, ReturnType.FAIL},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, ReturnType.FAIL},
-//
-//                // multidimensionale tra anyTypeKind, key, enable
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.USER, ParamType.VALID, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.USER, ParamType.INVALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.USER, ParamType.INVALID, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.USER, ParamType.EMPTY, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.USER, ParamType.EMPTY, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.USER, ParamType.NULL, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.USER, ParamType.NULL, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.GROUP, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.GROUP, ParamType.VALID, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.GROUP, ParamType.INVALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.GROUP, ParamType.INVALID, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.GROUP, ParamType.EMPTY, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.GROUP, ParamType.EMPTY, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.GROUP, ParamType.NULL, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.GROUP, ParamType.NULL, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.ANY_OBJECT, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.ANY_OBJECT, ParamType.VALID, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-//                {AnyTypeKind.ANY_OBJECT, ParamType.INVALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.ANY_OBJECT, ParamType.INVALID, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.ANY_OBJECT, ParamType.EMPTY, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.ANY_OBJECT, ParamType.EMPTY, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.ANY_OBJECT, ParamType.NULL, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-//                {AnyTypeKind.ANY_OBJECT, ParamType.NULL, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-
-
-                /* Iter 3 */
+                /* Iteration 2 */
+                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.NULL, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
+                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.EMPTY, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL}
         });
     }
 

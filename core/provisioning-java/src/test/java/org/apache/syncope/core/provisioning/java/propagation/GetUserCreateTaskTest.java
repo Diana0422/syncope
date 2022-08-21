@@ -19,6 +19,12 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/***
+ * This test was implemented to increment SC and CC in class DefaultPropagationManager and cover conditions at lines:
+ * - 159
+ * - 170
+ * - 171
+ */
 @RunWith(Parameterized.class)
 public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
 
@@ -69,11 +75,6 @@ public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
                 System.out.println("CASE VALID");
                 this.password = "myPass";
                 break;
-            case INVALID:
-                // FIXME probabilmente non è necessario perché la password deve essere impostata
-                System.out.println("CASE INVALID");
-                this.password = "invalidKey";
-                break;
             default:
                 System.out.println("CASE DEFAULT");
                 break;
@@ -99,7 +100,6 @@ public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
                 this.propByLinkedAccount = linked;
                 break;
             case INVALID:
-                // FIXME forse sbagliato
                 System.out.println("CASE INVALID");
                 linked.add(ResourceOperation.DELETE, pair);
                 this.propByLinkedAccount = linked;
@@ -115,61 +115,48 @@ public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
                 // {key, password, enable, propByRes, propByLinkedaccount, vAttrs, noPropResourceKeys, expected}
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-                {ParamType.INVALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-                {ParamType.NULL, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-                {ParamType.EMPTY, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
-                {ParamType.VALID, ParamType.EMPTY, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NULL_PTR_ERROR},
-                {ParamType.VALID, ParamType.NULL, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-                {ParamType.VALID, ParamType.INVALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NULL_PTR_ERROR}, //fixme + levare dipendenza tra i due test
-                {ParamType.VALID, ParamType.VALID, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.FAIL},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.NULL, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.NULL_PTR_ERROR}, //fixme + levare dipendenza tra i due test
-                {ParamType.VALID, ParamType.VALID, true, ParamType.INVALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, ReturnType.FAIL},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.NULL, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.INVALID, ParamType.VALID, ParamType.VALID, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.NULL, ParamType.VALID, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.INVALID, ParamType.VALID, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.NULL, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.INVALID, ReturnType.FAIL},
+                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.INVALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
+                {ParamType.EMPTY, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
+                {ParamType.NULL, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
+                {ParamType.VALID, ParamType.EMPTY, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.NULL, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.VALID, false, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.VALID, null, ParamType.INVALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
+                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.INVALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, ReturnType.FAIL}
         });
     }
 
     @Test
-    public void test() {
-        assertEquals(true, true);
-    }
+    public void testGetUserCreateTask() {
+        System.out.println("key: "+key);
+        System.out.println("password: "+password);
+        System.out.println("enable: "+enable);
+        System.out.println("propByRes: "+propByRes);
+        System.out.println("propByLinkedAccount: "+propByLinkedAccount);
+        System.out.println("vAttr: "+vAttr);
+        System.out.println("noPropResourceKeys: "+noPropResourceKeys);
+        List<PropagationTaskInfo> createTasks;
+        try {
+            createTasks = propagationManager.getUserCreateTasks(key, password, enable, propByRes, propByLinkedAccount, vAttr, noPropResourceKeys);
+        } catch (Exception e) {
+            assertEquals(expectedError.getClass(), e.getClass());
+            return;
+        }
 
-//    @Test
-//    public void testGetUserCreateTask() {
-//        System.out.println("key: "+key);
-//        System.out.println("password: "+password);
-//        System.out.println("enable: "+enable);
-//        System.out.println("propByRes: "+propByRes);
-//        System.out.println("propByLinkedAccount: "+propByLinkedAccount);
-//        System.out.println("vAttr: "+vAttr);
-//        System.out.println("noPropResourceKeys: "+noPropResourceKeys);
-//        List<PropagationTaskInfo> createTasks = null;
-//        try {
-//            createTasks = propagationManager.getUserCreateTasks(key, password, enable, propByRes, propByLinkedAccount, vAttr, noPropResourceKeys);
-//        } catch (Exception e) {
-//            assertEquals(expectedError.getClass(), e.getClass());
-//            return;
-//        }
-//
-//        if (createTasks.size() == 1) {
-//            PropagationTaskInfo propagationTaskInfo = createTasks.get(0);
-//            String anyType = propagationTaskInfo.getAnyType();
-//            String attributes = propagationTaskInfo.getAttributes();
-//
-//            assertEquals("USER", anyType);
-//            assertTrue(attributes.contains("Diana Pasquali") && attributes.contains("diapascal"));
-//        }
-//
-//        assertEquals(expected.size(), createTasks.size());
-//    }
+        if (createTasks.size() == 1) {
+            PropagationTaskInfo propagationTaskInfo = createTasks.get(0);
+            String anyType = propagationTaskInfo.getAnyType();
+            String attributes = propagationTaskInfo.getAttributes();
+
+            assertEquals("USER", anyType);
+            assertTrue(attributes.contains("Diana Pasquali") && attributes.contains("diapascal"));
+        }
+
+        assertEquals(expected.size(), createTasks.size());
+    }
 
 }

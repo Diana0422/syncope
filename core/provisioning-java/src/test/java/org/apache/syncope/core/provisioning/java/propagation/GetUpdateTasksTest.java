@@ -89,6 +89,7 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
                 this.noPropResourceKeys = new ArrayList();
                 break;
             default:
+                /* case NULL */
                 break;
         }
     }
@@ -103,7 +104,11 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
             case INVALID:
                 linked.add(ResourceOperation.DELETE, pair);
                 break;
+            case NULL:
+                linked = null;
+                break;
             default:
+                /* case EMPTY */
                 break;
         }
         this.propByLinkedAccount = linked;
@@ -113,6 +118,7 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
                 // {kind, key, changePwd, enable, propByRes, propByLinkedAccount, vAttrs, noPropResourceKey, Result}
+                /* Iteration 1 */
                 {AnyTypeKind.USER, ParamType.VALID, true, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
                 {AnyTypeKind.GROUP, ParamType.VALID, true, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
                 {AnyTypeKind.ANY_OBJECT, ParamType.VALID, true, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
@@ -125,6 +131,12 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
                 {AnyTypeKind.USER, ParamType.VALID, true, null, ParamType.VALID, ParamType.INVALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
                 {AnyTypeKind.USER, ParamType.VALID, true, null, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ReturnType.OK},
                 {AnyTypeKind.USER, ParamType.VALID, true, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, ReturnType.FAIL},
+
+                /* Iteration 2 */
+                {AnyTypeKind.USER, ParamType.VALID, true, null, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {AnyTypeKind.USER, ParamType.VALID, true, null, ParamType.VALID, ParamType.NULL, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {AnyTypeKind.USER, ParamType.VALID, true, null, ParamType.NULL, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
+                {AnyTypeKind.USER, ParamType.VALID, true, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.NULL, ReturnType.OK}
         });
     }
 

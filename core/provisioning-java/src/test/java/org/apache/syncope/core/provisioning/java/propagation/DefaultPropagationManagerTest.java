@@ -11,13 +11,11 @@ import org.apache.syncope.core.persistence.api.entity.anyobject.AnyObject;
 import org.apache.syncope.core.persistence.api.entity.group.Group;
 import org.apache.syncope.core.persistence.api.entity.user.User;
 import org.apache.syncope.core.provisioning.api.*;
-import org.apache.syncope.core.provisioning.api.cache.VirAttrCache;
 import org.apache.syncope.core.provisioning.api.propagation.PropagationManager;
 import org.apache.syncope.core.provisioning.api.propagation.PropagationTaskInfo;
 import org.apache.syncope.core.provisioning.java.propagation.dummies.*;
 import org.apache.syncope.core.provisioning.java.propagation.utils.*;
 import org.apache.syncope.core.spring.ApplicationContextProvider;
-import org.apache.syncope.core.spring.security.PasswordGenerator;
 import org.apache.syncope.core.spring.security.SyncopeGrantedAuthority;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.Name;
@@ -216,12 +214,12 @@ abstract class DefaultPropagationManagerTest {
             case VALID:
                 System.out.println("CASE VALID");
                 this.noPropResourceKeys = new ArrayList<>();
-                this.noPropResourceKeys.add("invalidKey");
+                this.noPropResourceKeys.add("validKey");
                 break;
             case INVALID:
                 System.out.println("CASE INVALID");
                 this.noPropResourceKeys = new ArrayList<>();
-                this.noPropResourceKeys.add("validKey");
+                this.noPropResourceKeys.add("invalidKey");
                 break;
             default:
                 System.out.println("CASE DEFAULT");
@@ -323,7 +321,7 @@ abstract class DefaultPropagationManagerTest {
                     attributes.add(uid);
 
                     /* User */
-                    Mockito.when(mappingManager.prepareAttrsFromAny(any(User.class), argThat(s -> s == null || s.equals("myPass")), eq(true), eq(enable), any(provision.getClass()))).thenReturn(attrs);
+                    Mockito.when(mappingManager.prepareAttrsFromAny(any(User.class), any(), eq(true), any(), any(provision.getClass()))).thenReturn(attrs);
                     break;
                 case GROUP:
                     name = new Name("Group Name");
