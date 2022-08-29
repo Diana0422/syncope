@@ -6,5 +6,6 @@ public enum ParamType {
     VALID,
     EXISTING,
     NOT_EXISTING,
-    NULL
+    NULL,
+    KILL_MUTANT;
 }

@@ -4,16 +4,17 @@ import org.apache.syncope.common.lib.types.CipherAlgorithm;
 import org.apache.syncope.core.persistence.api.entity.*;
 import org.apache.syncope.core.persistence.api.entity.resource.ExternalResource;
 import org.apache.syncope.core.persistence.api.entity.user.*;
+import org.apache.syncope.core.persistence.jpa.entity.AbstractGeneratedKeyEntity;
+import org.apache.syncope.core.persistence.jpa.entity.user.JPALinkedAccount;
 import org.apache.syncope.core.provisioning.java.propagation.dummies.DummyAnyTypeDAO;
 import org.apache.syncope.core.spring.ApplicationContextProvider;
 
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class UserTested implements User {
-    private String key;
+    private String key = "userTested";
+    private List<LinkedAccount> linkedAccounts = new ArrayList<>();
 
     @Override
     public OffsetDateTime getCreationDate() {
@@ -390,12 +391,15 @@ public class UserTested implements User {
 
     @Override
     public boolean add(LinkedAccount account) {
-        return false;
+        return linkedAccounts.contains((JPALinkedAccount) account) || linkedAccounts.add((JPALinkedAccount) account);
     }
 
     @Override
     public Optional<? extends LinkedAccount> getLinkedAccount(String resource, String connObjectKeyValue) {
-        return Optional.empty();
+        return linkedAccounts.stream().
+                filter(account -> account.getResource().getKey().equals(resource)
+                        && account.getConnObjectKeyValue().equals(connObjectKeyValue)).
+                findFirst();
     }
 
     @Override

@@ -1,7 +1,6 @@
 package org.apache.syncope.core.provisioning.java.propagation;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.syncope.common.lib.Attr;
 import org.apache.syncope.common.lib.types.AnyTypeKind;
 import org.apache.syncope.common.lib.types.ResourceOperation;
@@ -256,7 +255,8 @@ abstract class DefaultPropagationManagerTest {
         }
     }
 
-    protected void configurePropByRes(ParamType propByResType) {
+    protected void configurePropByRes(ParamType propByResType, boolean repeatedResUpdate, boolean repeatedResDelete,
+                                      boolean wrongOpRightKey) {
         switch (propByResType) {
             case NULL:
                 System.out.println("CASE NULL");
@@ -274,7 +274,23 @@ abstract class DefaultPropagationManagerTest {
             case VALID:
                 System.out.println("CASE VALID");
                 this.propByRes = new PropagationByResource<>();
-                this.propByRes.add(ResourceOperation.CREATE, "validKey");
+                if (repeatedResUpdate) {
+                    // we must handle the case in which there are repeated resources in propByRes
+                    // (mutation testing n° 424)
+                    this.propByRes.add(ResourceOperation.UPDATE, "validKey");
+                }
+
+                if (repeatedResDelete) {
+                    this.propByRes.add(ResourceOperation.DELETE, "validKey");
+                }
+
+                if (wrongOpRightKey) {
+                    // we must handle the in which propByRes contains the wrong operation but right key
+                    // (mutation testing n° 452)
+                    this.propByRes.add(ResourceOperation.DELETE, "validKey");
+                } else {
+                    this.propByRes.add(ResourceOperation.CREATE, "validKey");
+                }
                 break;
             default:
                 System.out.println("CASE DEFAULT");

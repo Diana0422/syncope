@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class AnyObjectTested implements AnyObject {
-    private String key;
+    private String key = "anyObjectTested";
     private AnyType type;
 
     @Override

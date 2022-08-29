@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class GroupTested implements Group {
-    private String key;
+    private String key = "groupTested";
 
     @Override
     public OffsetDateTime getCreationDate() {

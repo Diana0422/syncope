@@ -26,17 +26,26 @@ import static org.junit.Assert.assertTrue;
  * - 171
  */
 @RunWith(Parameterized.class)
-public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
+public class GetUserCreateTasksTest extends DefaultPropagationManagerTest {
 
     private String password;
     private PropagationByResource<Pair<String, String>> propByLinkedAccount;
 
-    public GetUserCreateTaskTest(ParamType keyType, ParamType passType, Boolean enable, ParamType propByResType, ParamType propByLinkedAccountType, ParamType vAttrType, ParamType noPropResourceKeysType, ReturnType returnType) {
+    /* Added with mutation testing */
+    private boolean noProp;
+
+    public GetUserCreateTasksTest(ParamType keyType, ParamType passType, Boolean enable, ParamType propByResType,
+                                  ParamType propByLinkedAccountType, boolean noProp,
+                                  ParamType vAttrType, ParamType noPropResourceKeysType, ReturnType returnType) {
         super(AnyTypeKind.USER);
-        configure(keyType, passType, enable, propByResType, propByLinkedAccountType, vAttrType, noPropResourceKeysType, returnType);
+        configure(keyType, passType, enable, propByResType,
+                propByLinkedAccountType, noProp,
+                vAttrType, noPropResourceKeysType, returnType);
     }
 
-    private void configure(ParamType keyType, ParamType passType, Boolean enable, ParamType propByResType, ParamType propByLinkedAccountType, ParamType vAttrType, ParamType noPropResourceKeysType, ReturnType returnType) {
+    private void configure(ParamType keyType, ParamType passType, Boolean enable, ParamType propByResType,
+                           ParamType propByLinkedAccountType, boolean noProp,
+                           ParamType vAttrType, ParamType noPropResourceKeysType, ReturnType returnType) {
         this.propagationManager = new DefaultPropagationManager(
                 virSchemaDAO,
                 externalResourceDAO,
@@ -49,12 +58,13 @@ public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
 
         this.enable = enable;
         this.anyTypeKind = AnyTypeKind.USER;
+        this.noProp = noProp;
 
         configureAnyType(AnyTypeKind.USER, this.getClass().getName());
         configureKey(keyType);
         configurePass(passType);
-        configurePropByRes(propByResType);
-        configureLinkedAccount(propByLinkedAccountType);
+        configurePropByRes(propByResType,false, false, false);
+        configureLinkedAccount(propByLinkedAccountType, noProp);
         configureVAttr(vAttrType);
         configureNoPropResourceKeys(noPropResourceKeysType);
         configureExpected(returnType);
@@ -81,22 +91,29 @@ public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
         }
     }
 
-    private void configureLinkedAccount(ParamType propByLinkedAccountType) {
+    private void configureLinkedAccount(ParamType propByLinkedAccountType, boolean noProp) {
         Pair<String, String> pair = new ImmutablePair<>("email", "diamerita@gmail.com");
         PropagationByResource<Pair<String, String>> linked = new PropagationByResource<>();
-
         switch (propByLinkedAccountType) {
             case NULL:
                 System.out.println("CASE NULL");
                 this.propByLinkedAccount = null;
                 break;
             case EMPTY:
+                /* propByLinkedAccount is empty
+                * (mutation testing n° 159)
+                * */
                 System.out.println("CASE EMPTY");
                 this.propByLinkedAccount = linked;
                 break;
             case VALID:
                 System.out.println("CASE VALID");
-                linked.add(ResourceOperation.CREATE, pair);
+                if (noProp) {
+                    pair = new ImmutablePair<>("validKey", "myAccount");
+                    linked.add(ResourceOperation.CREATE, pair);
+                } else {
+                    linked.add(ResourceOperation.CREATE, pair);
+                }
                 this.propByLinkedAccount = linked;
                 break;
             case INVALID:
@@ -114,19 +131,25 @@ public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
-                // {key, password, enable, propByRes, propByLinkedaccount, vAttrs, noPropResourceKeys, expected}
-                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {ParamType.INVALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
-                {ParamType.EMPTY, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
-                {ParamType.NULL, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
-                {ParamType.VALID, ParamType.EMPTY, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {ParamType.VALID, ParamType.NULL, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, false, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, null, ParamType.INVALID, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
-                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.INVALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ReturnType.OK},
-                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, ReturnType.FAIL}
+                // {key, password, enable, propByRes, propByLinkedaccount, noProp, vAttrs, noPropResourceKeys, expected}
+                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.INVALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
+                {ParamType.EMPTY, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
+                {ParamType.NULL, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
+                {ParamType.VALID, ParamType.EMPTY, null, ParamType.VALID, ParamType.VALID, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.NULL, null, ParamType.VALID, ParamType.VALID, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.VALID, false, ParamType.VALID, ParamType.VALID, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.VALID, null, ParamType.INVALID, ParamType.VALID, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
+                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.INVALID, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, false, ParamType.VALID, ParamType.EMPTY, ReturnType.OK},
+                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, false, ParamType.EMPTY, ParamType.VALID, ReturnType.FAIL},
+
+                /* Mutation Testing */
+                {ParamType.VALID, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, true, ParamType.EMPTY, ParamType.VALID, ReturnType.FAIL}, // kills mutant n° 171
+                {ParamType.VALID, ParamType.VALID, null, ParamType.EMPTY, ParamType.VALID, true, ParamType.EMPTY, ParamType.VALID, ReturnType.FAIL}, // kills mutant n° 171
+                {ParamType.VALID, ParamType.VALID, null, ParamType.EMPTY, ParamType.VALID, true, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK}, // kills mutant n° 171
+                {ParamType.VALID, ParamType.VALID, null, ParamType.EMPTY, ParamType.EMPTY, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL}, // kills mutant n° 159
         });
     }
 
@@ -150,10 +173,11 @@ public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
         if (createTasks.size() == 1) {
             PropagationTaskInfo propagationTaskInfo = createTasks.get(0);
             String anyType = propagationTaskInfo.getAnyType();
-            String attributes = propagationTaskInfo.getAttributes();
-
             assertEquals("USER", anyType);
-            assertTrue(attributes.contains("Diana Pasquali") && attributes.contains("diapascal"));
+            if (!vAttr.isEmpty()) {
+                String attributes = propagationTaskInfo.getAttributes();
+                assertTrue(attributes.contains("Diana Pasquali") && attributes.contains("diapascal"));
+            }
         }
 
         assertEquals(expected.size(), createTasks.size());
