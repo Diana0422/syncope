@@ -333,6 +333,7 @@ under the License.
                 <!-- test implementations -->
                 <param>org.apache.syncope.core.provisioning.java.propagation.GetCreateTasksTest</param>
                 <param>org.apache.syncope.core.provisioning.java.propagation.GetUpdateTasksTest</param>
+                <param>org.apache.syncope.core.provisioning.java.propagation.GetUserCreateTasksTest</param>
                 <param>org.apache.syncope.core.provisioning.java.propagation.ExecuteTaskTest</param>
               </targetTests>
             </configuration>
