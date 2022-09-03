@@ -206,6 +206,7 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
                 /* Iteration 1 */
                 {ParamType.EMPTY, 1, 1, 1, false, ParamType.VALID, ReturnType.VOID},
                 {ParamType.VALID, 1, 1, 0, false, ParamType.VALID, ReturnType.OK},
+                {ParamType.VALID, 1, 1, 1, false, ParamType.VALID, ReturnType.OK},
                 {ParamType.VALID, 1, 1, 0, true, ParamType.VALID, ReturnType.OK},
                 {ParamType.VALID, 1, 1, 1, false, ParamType.EMPTY, ReturnType.FAIL},
                 {ParamType.VALID, 1, 1, 1, false, ParamType.NULL, ReturnType.FAIL},
@@ -215,7 +216,6 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
 
                 /* Mutation testing */
                 {ParamType.VALID, 3, 2, 3, false, ParamType.VALID, ReturnType.OK}, // kills mutant n°132
-//                {ParamType.VALID, 3, 2, 2, true, ParamType.VALID, ReturnType.OK}, // kills mutant n°137
         });
     }
 
