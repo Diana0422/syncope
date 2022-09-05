@@ -106,7 +106,6 @@ public abstract class PropagationManagerAndExecutorIT {
         this.virSchema = new DummyVirSchema();
         this.provision = new DummyProvision();
         this.mapping = new DummyMapping();
-        // TODO forse riunire in un unica classe AnyType e passare il tipo al costruttore
         if (anyTypeKind != null) {
             switch (anyTypeKind) {
                 case USER:

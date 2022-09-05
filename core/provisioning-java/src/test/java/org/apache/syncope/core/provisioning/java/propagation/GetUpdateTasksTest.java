@@ -58,32 +58,31 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
 
         configureAnyType(anyTypeKind, this.getClass().getName());
         configureKey(keyType);
-        configurePropByRes(propByResType, false, false);
+        configurePropByRes(propByResType);
         configurePropByLinkedAccount(propByLinkedType, noProp);
         configureVAttr(vAttrType);
         configureNoPropResourceKeys(noPropResourceKeysType);
         configureExpected(returnType);
     }
 
-    protected void configurePropByRes(ParamType propByResType, boolean repeatedRes, boolean wrongOpRightKey) {
+    @Override
+    protected void configurePropByRes(ParamType propByResType) {
         switch (propByResType) {
             case INVALID:
-                System.out.println("CASE INVALID");
                 this.propByRes = new PropagationByResource<>();
                 this.propByRes.add(ResourceOperation.DELETE, "invalidKey");
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.propByRes = new PropagationByResource<>();
                 this.propByRes.add(ResourceOperation.UPDATE, "validKey");
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
 
     }
 
+    @Override
     protected void configureNoPropResourceKeys(ParamType noPropResourceKeysType) {
         switch (noPropResourceKeysType) {
             case VALID:
@@ -184,12 +183,6 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
 
     @Test
     public void test() {
-        System.out.println("anyType: "+anyTypeKind);
-        System.out.println("key: "+key);
-        System.out.println("enable: "+enable);
-        System.out.println("propByRes: "+propByRes);
-        System.out.println("vAttr: "+vAttr);
-        System.out.println("noPropResourceKeys: "+noPropResourceKeys);
         List<PropagationTaskInfo> updateTasks;
 
         try {

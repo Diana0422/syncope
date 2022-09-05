@@ -79,7 +79,6 @@ abstract class DefaultPropagationManagerTest {
         this.virSchema = new DummyVirSchema();
         this.provision = new DummyProvision();
         this.mapping = new DummyMapping();
-        // TODO forse riunire in un unica classe AnyType e passare il tipo al costruttore
         if (anyTypeKind != null) {
             switch (anyTypeKind) {
                 case USER:
@@ -195,7 +194,6 @@ abstract class DefaultPropagationManagerTest {
                 this.expected = new ArrayList<>();
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -203,25 +201,20 @@ abstract class DefaultPropagationManagerTest {
     protected void configureNoPropResourceKeys(ParamType noPropResourceKeysType) {
         switch (noPropResourceKeysType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.noPropResourceKeys = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.noPropResourceKeys = new ArrayList<>();
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.noPropResourceKeys = new ArrayList<>();
                 this.noPropResourceKeys.add("validKey");
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 this.noPropResourceKeys = new ArrayList<>();
                 this.noPropResourceKeys.add("invalidKey");
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -230,70 +223,43 @@ abstract class DefaultPropagationManagerTest {
         Attr attr = new Attr();
         switch (vAttrType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.vAttr = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.vAttr = new ArrayList<>();
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 attr.setSchema("vSchema");
                 this.vAttr = new ArrayList<>();
                 this.vAttr.add(attr);
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 attr.setSchema("invalidSchema");
                 this.vAttr = new ArrayList<>();
                 this.vAttr.add(attr);
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
 
-    protected void configurePropByRes(ParamType propByResType, boolean repeatedResUpdate, boolean repeatedResDelete,
-                                      boolean wrongOpRightKey) {
+    protected void configurePropByRes(ParamType propByResType) {
         switch (propByResType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.propByRes = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.propByRes = new PropagationByResource<>();
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 this.propByRes = new PropagationByResource<>();
                 this.propByRes.add(ResourceOperation.DELETE, "invalidKey");
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.propByRes = new PropagationByResource<>();
-                if (repeatedResUpdate) {
-                    // we must handle the case in which there are repeated resources in propByRes
-                    // (mutation testing n° 424)
-                    this.propByRes.add(ResourceOperation.UPDATE, "validKey");
-                }
-
-                if (repeatedResDelete) {
-                    this.propByRes.add(ResourceOperation.DELETE, "validKey");
-                }
-
-                if (wrongOpRightKey) {
-                    // we must handle the in which propByRes contains the wrong operation but right key
-                    // (mutation testing n° 452)
-                    this.propByRes.add(ResourceOperation.DELETE, "validKey");
-                } else {
-                    this.propByRes.add(ResourceOperation.CREATE, "validKey");
-                }
+                this.propByRes.add(ResourceOperation.CREATE, "validKey");
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -302,23 +268,18 @@ abstract class DefaultPropagationManagerTest {
     protected void configureKey(ParamType keyType) {
         switch (keyType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.key = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.key = "";
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.key = "validKey";
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 this.key = "invalidKey";
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }

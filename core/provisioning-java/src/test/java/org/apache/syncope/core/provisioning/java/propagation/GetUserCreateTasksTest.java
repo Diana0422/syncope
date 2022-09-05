@@ -63,12 +63,11 @@ public class GetUserCreateTasksTest extends DefaultPropagationManagerTest {
         configureAnyType(AnyTypeKind.USER, this.getClass().getName());
         configureKey(keyType);
         configurePass(passType);
-        configurePropByRes(propByResType,false, false, false);
+        configurePropByRes(propByResType);
         configureLinkedAccount(propByLinkedAccountType, noProp);
         configureVAttr(vAttrType);
         configureNoPropResourceKeys(noPropResourceKeysType);
         configureExpected(returnType);
-        System.out.println("anyTypeKind = " + anyTypeKind + ", key = " + key + ", enable = " + enable + ", propByRes = " + propByRes+ ", vAttr = " + vAttr + ", noPropResourceKeys = " + noPropResourceKeys + ", returnType = " + returnType);
     }
 
     private void configurePass(ParamType passType) {
@@ -155,13 +154,6 @@ public class GetUserCreateTasksTest extends DefaultPropagationManagerTest {
 
     @Test
     public void testGetUserCreateTask() {
-        System.out.println("key: "+key);
-        System.out.println("password: "+password);
-        System.out.println("enable: "+enable);
-        System.out.println("propByRes: "+propByRes);
-        System.out.println("propByLinkedAccount: "+propByLinkedAccount);
-        System.out.println("vAttr: "+vAttr);
-        System.out.println("noPropResourceKeys: "+noPropResourceKeys);
         List<PropagationTaskInfo> createTasks;
         try {
             createTasks = propagationManager.getUserCreateTasks(key, password, enable, propByRes, propByLinkedAccount, vAttr, noPropResourceKeys);

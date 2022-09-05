@@ -141,7 +141,8 @@ public class DummyAnyUtils implements AnyUtils {
                 provision.setObjectClass(new ObjectClass("objectClass"));
                 resource.add(provision);
                 Mockito.when(result.authFind("validKey")).thenReturn((A) user);
-                Mockito.when(result.findAllowedSchemas((A) any(User.class), eq(VirSchema.class))).thenReturn(new AllowedSchemas<>());
+                Mockito.when(result.findAllowedSchemas((A) any(User.class), eq(VirSchema.class)))
+                        .thenReturn(new AllowedSchemas<>());
                 break;
 
             case GROUP:

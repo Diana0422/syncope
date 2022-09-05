@@ -18,26 +18,15 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class GetCreateTasksTest extends DefaultPropagationManagerTest {
 
-    // Added with mutation testing
-    private boolean repeatedResUpdate;
-    private boolean repeatedResDelete;
-    private boolean wrongOpRightKey;
-
     public GetCreateTasksTest(AnyTypeKind anyTypeKind, ParamType keyType, Boolean enable,
-                              ParamType propByResType, boolean repeatedResUpdate, boolean repeatedResDelete,
-                              boolean wrongOpRightKey,
-                              ParamType vAttrType, ParamType noPropResourceKeysType, ReturnType returnType) {
+                              ParamType propByResType, ParamType vAttrType, ParamType noPropResourceKeysType,
+                              ReturnType returnType) {
         super(anyTypeKind);
-        System.out.println("anyTypeKind = " + anyTypeKind + ", keyType = " + keyType + ", enable = " + enable + ", propByResType = " + propByResType + ", vAttrType = " + vAttrType + ", noPropResourceKeysType = " + noPropResourceKeysType + ", returnType = " + returnType);
-        configure(anyTypeKind, keyType, enable, propByResType, repeatedResUpdate, repeatedResDelete, wrongOpRightKey,
-                vAttrType, noPropResourceKeysType, returnType);
+        configure(anyTypeKind, keyType, enable, propByResType, vAttrType, noPropResourceKeysType, returnType);
     }
 
     private void configure(AnyTypeKind anyTypeKind, ParamType keyType, Boolean enable,
-                           ParamType propByResType, boolean repeatedResUpdate, boolean repeatedResDelete,
-                           boolean wrongOpRightKey,
-                           ParamType vAttrType, ParamType noPropResourceKeysType, ReturnType returnType) {
-        System.out.println("IN CONFIG: "+"anyTypeKind = " + anyTypeKind + ", keyType = " + keyType + ", enable = " + enable + ", propByResType = " + propByResType + ", vAttrType = " + vAttrType + ", noPropResourceKeysType = " + noPropResourceKeysType + ", returnType = " + returnType);
+                           ParamType propByResType, ParamType vAttrType, ParamType noPropResourceKeysType, ReturnType returnType) {
         this.propagationManager = new DefaultPropagationManager(
                 virSchemaDAO,
                 externalResourceDAO,
@@ -50,19 +39,15 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
 
         this.anyTypeKind = anyTypeKind;
         this.enable = enable;
-        this.repeatedResUpdate = repeatedResUpdate;
-        this.repeatedResDelete = repeatedResDelete;
-        this.wrongOpRightKey = wrongOpRightKey;
-
         configureAnyType(anyTypeKind, this.getClass().getName());
         configureKey(keyType);
-        configurePropByRes(propByResType, repeatedResUpdate, repeatedResDelete, wrongOpRightKey);
+        configurePropByRes(propByResType);
         configureVAttr(vAttrType);
         configureNoPropResourceKeys(noPropResourceKeysType);
         configureExpected(returnType);
-        System.out.println("anyTypeKind = " + anyTypeKind + ", key = " + key + ", enable = " + enable + ", propByRes = " + propByRes+ ", vAttr = " + vAttr + ", noPropResourceKeys = " + noPropResourceKeys + ", returnType = " + returnType);
     }
 
+    @Override
     protected void configureExpected(ReturnType returnType) {
         switch (returnType) {
             case OK:
@@ -84,16 +69,7 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
                     default:
                         break;
                 }
-                if (repeatedResUpdate) {
-                    taskInfo.setOperation(ResourceOperation.UPDATE);
-                } else if (wrongOpRightKey){
-                    taskInfo.setOperation(ResourceOperation.DELETE);
-                } else {
-                    taskInfo.setOperation(ResourceOperation.CREATE);
-                }
-                if (repeatedResDelete) {
-                    taskInfo.setOperation(ResourceOperation.DELETE);
-                }
+                taskInfo.setOperation(ResourceOperation.CREATE);
                 this.expected = new ArrayList<>(Collections.singleton(taskInfo));
                 break;
             case NULL_PTR_ERROR:
@@ -114,40 +90,31 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
-                // {anyTypeKind, key, enable, propByRes, repeatedResUpdate, repeatedResDelete, wrongOpRightKey, vAttr, noPropResourceKeys, resultType}
+                // {anyTypeKind, key, enable, propByRes, vAttr, noPropResourceKeys, resultType}
                 /* Iteration 1 */
-                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, false, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {AnyTypeKind.GROUP, ParamType.VALID, null, ParamType.VALID, false, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {AnyTypeKind.ANY_OBJECT, ParamType.VALID, null, ParamType.VALID, false, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {AnyTypeKind.USER, ParamType.INVALID, null, ParamType.VALID, false, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
-                {AnyTypeKind.USER, ParamType.NULL, null, ParamType.VALID, false, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
-                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, false, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {AnyTypeKind.USER, ParamType.VALID, false, ParamType.VALID, false, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
-                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.INVALID, false, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
-                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, false, false, false, ParamType.VALID, ParamType.EMPTY, ReturnType.OK},
-                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, false, false, false, ParamType.EMPTY, ParamType.VALID, ReturnType.FAIL},
+                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {AnyTypeKind.GROUP, ParamType.VALID, null, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {AnyTypeKind.ANY_OBJECT, ParamType.VALID, null, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {AnyTypeKind.USER, ParamType.INVALID, null, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
+                {AnyTypeKind.USER, ParamType.NULL, null, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.NOT_FOUND_ERROR},
+                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {AnyTypeKind.USER, ParamType.VALID, false, ParamType.VALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK},
+                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.INVALID, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
+                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ReturnType.OK},
+                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, ReturnType.FAIL},
 
                 /* Iteration 2 */
-                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.NULL, false, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
-                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.EMPTY, false, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
+                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.NULL, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
+                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.EMPTY, ParamType.EMPTY, ParamType.EMPTY, ReturnType.FAIL},
 
                 /* Mutation Testing */
-//fixme se eliminato allora devo levare repeatedResUpdate e repeatedResDelete                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, true, false, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK}, // kills mutant n° 424
-//                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, false, true, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK}, // kills mutant n° 424
-//                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, true, true, false, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK}, // kills mutant n° 424
-//fixme se eliminato allora devo levare wrongOpRightKey                {AnyTypeKind.USER, ParamType.VALID, null, ParamType.VALID, false, true, ParamType.EMPTY, ParamType.EMPTY, ReturnType.OK} // kills mutant n° 452
+                // no test case added
         });
     }
 
     @Test
     public void testGetCreateTask() {
-        System.out.println("anyType: "+anyTypeKind);
-        System.out.println("key: "+key);
-        System.out.println("enable: "+enable);
-        System.out.println("propByRes: "+propByRes);
-        System.out.println("vAttr: "+vAttr);
-        System.out.println("noPropResourceKeys: "+noPropResourceKeys);
-        List<PropagationTaskInfo> createTasks = null;
+        List<PropagationTaskInfo> createTasks;
         try {
             createTasks = propagationManager.getCreateTasks(anyTypeKind, key, enable, propByRes, vAttr, noPropResourceKeys);
         } catch (Exception e) {

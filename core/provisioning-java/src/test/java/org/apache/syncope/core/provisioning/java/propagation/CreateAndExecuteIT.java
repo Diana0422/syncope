@@ -70,6 +70,7 @@ public class CreateAndExecuteIT extends PropagationManagerAndExecutorIT{
         configureResult(returnType);
     }
 
+
     private void configureResult(ReturnType returnType) {
         List<PropagationStatus> statuses = new ArrayList<>();
         switch (returnType) {
@@ -81,10 +82,9 @@ public class CreateAndExecuteIT extends PropagationManagerAndExecutorIT{
                 break;
             case FAIL:
                 this.expected = Mockito.mock(DefaultPropagationReporter.class);
-                // FIXME
-//                PropagationStatus statusFail = new PropagationStatus();
-//                statusFail.setStatus(ExecStatus.FAILURE);
-//                statuses.add(statusFail);
+                PropagationStatus statusFail = new PropagationStatus();
+                statusFail.setStatus(ExecStatus.FAILURE);
+                statuses.add(statusFail);
                 break;
             case NULL_PTR_ERROR:
                 this.expectedError = new NullPointerException();
@@ -92,6 +92,11 @@ public class CreateAndExecuteIT extends PropagationManagerAndExecutorIT{
             case NOT_FOUND_ERROR:
                 this.expectedError = new NotFoundException("Not found");
                 break;
+            case VOID:
+                /* No Task Executed */
+                this.expected = Mockito.mock(DefaultPropagationReporter.class);
+                break;
+
         }
         if (expected != null) Mockito.when(this.expected.getStatuses()).thenReturn(statuses);
     }
@@ -118,10 +123,6 @@ public class CreateAndExecuteIT extends PropagationManagerAndExecutorIT{
                 break;
             case VALID:
                 this.executor = "validExecutor";
-                break;
-            case INVALID:
-                // TODO forse non ci sta un executor non valido?
-                this.executor = "invalidExecutor";
                 break;
         }
     }
@@ -169,25 +170,20 @@ public class CreateAndExecuteIT extends PropagationManagerAndExecutorIT{
     private void configureNoPropResourceKeys(ParamType noPropResourceKeysType) {
         switch (noPropResourceKeysType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.noPropResourceKeys = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.noPropResourceKeys = new ArrayList<>();
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.noPropResourceKeys = new ArrayList<>();
                 this.noPropResourceKeys.add("invalidKey");
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 this.noPropResourceKeys = new ArrayList<>();
                 this.noPropResourceKeys.add("validKey");
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -196,27 +192,22 @@ public class CreateAndExecuteIT extends PropagationManagerAndExecutorIT{
         Attr attr = new Attr();
         switch (vAttrType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.vAttr = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.vAttr = new ArrayList<>();
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 attr.setSchema("vSchema");
                 this.vAttr = new ArrayList<>();
                 this.vAttr.add(attr);
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 attr.setSchema("invalidSchema");
                 this.vAttr = new ArrayList<>();
                 this.vAttr.add(attr);
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -224,25 +215,20 @@ public class CreateAndExecuteIT extends PropagationManagerAndExecutorIT{
     private void configurePropByRes(ParamType propByResType) {
         switch (propByResType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.propByRes = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.propByRes = new PropagationByResource<>();
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 this.propByRes = new PropagationByResource<>();
                 this.propByRes.add(ResourceOperation.DELETE, "invalidKey");
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.propByRes = new PropagationByResource<>();
                 this.propByRes.add(ResourceOperation.CREATE, "validKey");
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -251,23 +237,18 @@ public class CreateAndExecuteIT extends PropagationManagerAndExecutorIT{
     private void configureKey(ParamType keyType) {
         switch (keyType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.key = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.key = "";
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.key = "validKey";
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 this.key = "invalidKey";
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -328,24 +309,21 @@ public class CreateAndExecuteIT extends PropagationManagerAndExecutorIT{
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
                 {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.OK},
-                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.FAIL},
+                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.VOID},
                 {AnyTypeKind.USER, ParamType.NULL, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
                 {AnyTypeKind.USER, ParamType.EMPTY, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
                 {AnyTypeKind.USER, ParamType.INVALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.NOT_FOUND_ERROR},
                 {AnyTypeKind.USER, ParamType.VALID, false, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.OK},
-                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.FAIL},
-                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.INVALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.FAIL},
+                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.VOID},
+                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.INVALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.VOID},
                 {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, ParamType.VALID, true, ParamType.VALID,ReturnType.OK},
                 {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.NULL, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.OK},
                 {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.INVALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.OK},
                 {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.VALID, ReturnType.OK},
                 {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.NULL, ParamType.VALID, true, ParamType.VALID, ReturnType.OK},
-                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.INVALID, ParamType.VALID, true, ParamType.VALID, ReturnType.FAIL},
+                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.INVALID, ParamType.VALID, true, ParamType.VALID, ReturnType.VOID},
                 {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, ParamType.VALID, true, ParamType.VALID, ReturnType.OK},
-// fixme          {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.EMPTY, true, ParamType.VALID, ReturnType.FAIL},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.NULL, true, ParamType.VALID, ReturnType.NULL_PTR_ERROR},
-//                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.INVALID, true, ParamType.VALID, ReturnType.NULL_PTR_ERROR},
-                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, false, ParamType.VALID, ReturnType.FAIL},
+                {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, false, ParamType.VALID, ReturnType.VOID},
                 {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.EMPTY, ReturnType.OK},
                 {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.NULL, ReturnType.OK},
                 {AnyTypeKind.USER, ParamType.VALID, true, ParamType.VALID, ParamType.VALID, ParamType.VALID, ParamType.VALID, true, ParamType.INVALID, ReturnType.OK}
@@ -357,7 +335,8 @@ public class CreateAndExecuteIT extends PropagationManagerAndExecutorIT{
     public void testIntegration() {
         PropagationReporter reporter;
         try {
-            List<PropagationTaskInfo> createTasks = propagationManager.getCreateTasks(anyTypeKind, key, enable, propByRes, vAttr, noPropResourceKeys);
+            List<PropagationTaskInfo> createTasks = propagationManager
+                    .getCreateTasks(anyTypeKind, key, enable, propByRes, vAttr, noPropResourceKeys);
             reporter = taskExecutor.execute(createTasks, nullPriorityAsync, executor);
         } catch (Exception e) {
             assertEquals(expectedError.getClass(), e.getClass());

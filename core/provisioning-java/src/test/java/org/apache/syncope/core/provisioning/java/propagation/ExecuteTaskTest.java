@@ -143,10 +143,6 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
             case VALID:
                 this.executor = "validExecutor";
                 break;
-            case INVALID:
-                // TODO forse non ci sta un executor non valido?
-                this.executor = "invalidExecutor";
-                break;
         }
     }
 
